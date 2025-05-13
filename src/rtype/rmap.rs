@@ -10,7 +10,7 @@ pub enum Key {
     Str(String),
 }
 
-pub fn extract_key(key: PyObject, py: Python<'_>) -> PyResult<Key> {
+pub fn try_into_key(key: PyObject, py: Python<'_>) -> PyResult<Key> {
     if let Ok(i) = key.extract::<i64>(py) {
         Ok(Key::Int(i))
     } else if let Ok(s) = key.extract::<String>(py) {
@@ -38,7 +38,7 @@ impl RMap {
     }
 
     fn set<'a>(&self, py: Python<'a>, key: PyObject, value: PyObject) -> PyResult<Bound<'a, PyAny>> {
-        let key = extract_key(key, py)?;
+        let key = try_into_key(key, py)?;
         let map = self.map.clone();
         pyo3_async_runtimes::tokio::future_into_py(py, async move {
             let mut locked = map.lock().await;
@@ -48,7 +48,7 @@ impl RMap {
     }
 
     fn pop<'a>(&self, py: Python<'a>, key: PyObject) -> PyResult<Bound<'a, PyAny>> {
-        let key = extract_key(key, py)?;
+        let key = try_into_key(key, py)?;
         let map = self.map.clone();
         pyo3_async_runtimes::tokio::future_into_py(py, async move {
             let mut locked = map.lock().await;
@@ -58,7 +58,7 @@ impl RMap {
     }
 
     fn get<'a>(&self, py: Python<'a>, key: PyObject) -> PyResult<Bound<'a, PyAny>> {
-        let key = extract_key(key, py)?;
+        let key = try_into_key(key, py)?;
         let map = self.map.clone();
         let factory = self.factory.as_ref().map(|f| f.clone_ref(py));
 
