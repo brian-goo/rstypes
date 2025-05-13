@@ -5,12 +5,12 @@ use pyo3::prelude::*;
 use tokio::sync::Mutex;
 
 #[derive(Hash, Eq, PartialEq, Clone, Debug)]
-enum Key {
+pub enum Key {
     Int(i64),
     Str(String),
 }
 
-fn extract_key(key: PyObject, py: Python<'_>) -> PyResult<Key> {
+pub fn extract_key(key: PyObject, py: Python<'_>) -> PyResult<Key> {
     if let Ok(i) = key.extract::<i64>(py) {
         Ok(Key::Int(i))
     } else if let Ok(s) = key.extract::<String>(py) {

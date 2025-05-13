@@ -5,9 +5,11 @@ use indexmap::{map::Entry, IndexMap};
 use pyo3::prelude::*;
 use tokio::sync::Mutex;
 
+use crate::rtype::rmap::{extract_key, Key};
+
 #[pyclass]
 pub struct RCacheMap {
-    map: Arc<Mutex<IndexMap<String, (Instant, PyObject)>>>,
+    map: Arc<Mutex<IndexMap<Key, (Instant, PyObject)>>>,
 }
 
 #[pymethods]
@@ -19,7 +21,8 @@ impl RCacheMap {
         }
     }
 
-    fn set<'a>(&self, py: Python<'a>, key: String, value: PyObject, ttl: f64) -> PyResult<Bound<'a, PyAny>> {
+    fn set<'a>(&self, py: Python<'a>, key: PyObject, value: PyObject, ttl: f64) -> PyResult<Bound<'a, PyAny>> {
+        let key = extract_key(key, py)?;
         let map = self.map.clone();
         pyo3_async_runtimes::tokio::future_into_py(py, async move {
             let mut locked = map.lock().await;
@@ -29,7 +32,8 @@ impl RCacheMap {
         })
     }
 
-    fn get<'a>(&self, py: Python<'a>, key: String) -> PyResult<Bound<'a, PyAny>> {
+    fn get<'a>(&self, py: Python<'a>, key: PyObject) -> PyResult<Bound<'a, PyAny>> {
+        let key = extract_key(key, py)?;
         let map = self.map.clone();
 
         pyo3_async_runtimes::tokio::future_into_py(py, async move {
@@ -51,7 +55,8 @@ impl RCacheMap {
 
     /// No trait for this with RMap's pop since it seems we cannot implement it cleanly
     /// due to different base struct etc
-    fn pop<'a>(&self, py: Python<'a>, key: String) -> PyResult<Bound<'a, PyAny>> {
+    fn pop<'a>(&self, py: Python<'a>, key: PyObject) -> PyResult<Bound<'a, PyAny>> {
+        let key = extract_key(key, py)?;
         let map = self.map.clone();
         pyo3_async_runtimes::tokio::future_into_py(py, async move {
             let mut locked = map.lock().await;
