@@ -12,7 +12,7 @@ class Foo(NamedTuple):
 
 
 @pytest.mark.asyncio
-async def test_basic_operations():
+async def test_basic_operations() -> None:
     d = RMap()
 
     await d.pop("hello")
@@ -34,7 +34,7 @@ async def test_basic_operations():
 
 
 @pytest.mark.asyncio
-async def test_default_dict():
+async def test_default_dict() -> None:
     d = RMap(asyncio.Lock)
     lock = await d.get("foo")
     assert isinstance(lock, asyncio.Lock)
@@ -50,14 +50,14 @@ async def test_default_dict():
 
 
 @pytest.mark.asyncio
-async def test_default_dict_with_context():
+async def test_default_dict_with_context() -> None:
     d = RMap(asyncio.Lock)
     async with cast(asyncio.Lock, await d.get("foo")):
         pass  # Lock should be acquired and released
 
 
 @pytest.mark.asyncio
-async def test_concurrent_operations():
+async def test_concurrent_operations() -> None:
     d = RMap()
 
     # Test concurrent set
@@ -79,7 +79,7 @@ async def test_concurrent_operations():
 
 
 @pytest.mark.asyncio
-async def test_concurrent_get_set():
+async def test_concurrent_get_set() -> None:
     d = RMap()
 
     async def set_key():
@@ -93,7 +93,7 @@ async def test_concurrent_get_set():
 
 
 @pytest.mark.asyncio
-async def test_int_keys():
+async def test_int_keys() -> None:
     d = RMap()
 
     # Test basic operations with int keys
@@ -113,7 +113,7 @@ async def test_int_keys():
 
 
 @pytest.mark.asyncio
-async def test_int_keys_with_default():
+async def test_int_keys_with_default() -> None:
     d = RMap(asyncio.Lock)
     lock = await d.get(42)
     assert isinstance(lock, asyncio.Lock)
@@ -129,7 +129,7 @@ async def test_int_keys_with_default():
 
 
 @pytest.mark.asyncio
-async def test_mixed_keys():
+async def test_mixed_keys() -> None:
     d = RMap()
 
     # Test mixing string and int keys
@@ -154,7 +154,7 @@ async def test_mixed_keys():
 
 
 @pytest.mark.asyncio
-async def test_concurrent_int_keys():
+async def test_concurrent_int_keys() -> None:
     d = RMap()
 
     # Test concurrent set with int keys
@@ -176,7 +176,7 @@ async def test_concurrent_int_keys():
 
 
 @pytest.mark.asyncio
-async def test_concurrent_mixed_keys():
+async def test_concurrent_mixed_keys() -> None:
     d = RMap()
 
     async def set_keys():
