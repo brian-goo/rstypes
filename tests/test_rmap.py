@@ -1,0 +1,92 @@
+import asyncio
+from typing import NamedTuple, cast
+
+import pytest
+
+from rstypes import RMap
+
+
+class Foo(NamedTuple):
+    name: str
+    age: int
+
+
+@pytest.mark.asyncio
+async def test_basic_operations():
+    d = RMap()
+
+    await d.pop("hello")
+    assert (await d.get("hello")) is None
+
+    await d.set(key="hello", value=123)
+    await d.set(key="cool_lock", value=asyncio.Lock())
+    await d.set(key="user", value=Foo(name="Alice", age=30))
+
+    assert (await d.get("hello")) == 123
+    assert isinstance(await d.get("cool_lock"), asyncio.Lock)
+    user = await d.get("user")
+    assert isinstance(user, Foo)
+    assert user.name == "Alice"
+    assert user.age == 30
+
+    await d.pop("hello")
+    assert (await d.get("hello")) is None
+
+
+@pytest.mark.asyncio
+async def test_default_dict():
+    d = RMap(asyncio.Lock)
+    lock = await d.get("foo")
+    assert isinstance(lock, asyncio.Lock)
+
+    await d.set("foo", 7)
+    assert (await d.get("foo")) == 7
+
+    d = RMap(lambda: Foo(name="Alice", age=30))
+    user = await d.get("foo")
+    assert isinstance(user, Foo)
+    assert user.name == "Alice"
+    assert user.age == 30
+
+
+@pytest.mark.asyncio
+async def test_default_dict_with_context():
+    d = RMap(asyncio.Lock)
+    async with cast(asyncio.Lock, await d.get("foo")):
+        pass  # Lock should be acquired and released
+
+
+@pytest.mark.asyncio
+async def test_concurrent_operations():
+    d = RMap()
+
+    # Test concurrent set
+    await asyncio.gather(
+        d.set("a", 1),
+        d.set("b", asyncio.Lock()),
+        d.set("c", asyncio.get_running_loop().create_future()),
+    )
+
+    # Test concurrent get
+    results = await asyncio.gather(
+        d.get("a"),
+        d.get("b"),
+        d.get("c"),
+    )
+    assert results[0] == 1
+    assert isinstance(results[1], asyncio.Lock)
+    assert isinstance(results[2], asyncio.Future)
+
+
+@pytest.mark.asyncio
+async def test_concurrent_get_set():
+    d = RMap()
+
+    async def set_key():
+        await d.set("x", 42)
+
+    async def get_key():
+        val = await d.get("x")
+        assert val in (None, 42)  # Value could be None or 42
+
+    await asyncio.gather(set_key(), get_key(), set_key(), get_key())
