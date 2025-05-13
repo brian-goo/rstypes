@@ -4,9 +4,25 @@ use indexmap::{map::Entry, IndexMap};
 use pyo3::prelude::*;
 use tokio::sync::Mutex;
 
+#[derive(Hash, Eq, PartialEq, Clone, Debug)]
+enum Key {
+    Int(i64),
+    Str(String),
+}
+
+fn extract_key(key: PyObject, py: Python<'_>) -> PyResult<Key> {
+    if let Ok(i) = key.extract::<i64>(py) {
+        Ok(Key::Int(i))
+    } else if let Ok(s) = key.extract::<String>(py) {
+        Ok(Key::Str(s))
+    } else {
+        Err(PyErr::new::<pyo3::exceptions::PyTypeError, _>("Key must be int or str"))
+    }
+}
+
 #[pyclass]
 pub struct RMap {
-    map: Arc<Mutex<IndexMap<String, PyObject>>>,
+    map: Arc<Mutex<IndexMap<Key, PyObject>>>,
     factory: Option<PyObject>, // PyObject: python callable
 }
 
@@ -21,7 +37,8 @@ impl RMap {
         }
     }
 
-    fn set<'a>(&self, py: Python<'a>, key: String, value: PyObject) -> PyResult<Bound<'a, PyAny>> {
+    fn set<'a>(&self, py: Python<'a>, key: PyObject, value: PyObject) -> PyResult<Bound<'a, PyAny>> {
+        let key = extract_key(key, py)?;
         let map = self.map.clone();
         pyo3_async_runtimes::tokio::future_into_py(py, async move {
             let mut locked = map.lock().await;
@@ -30,7 +47,8 @@ impl RMap {
         })
     }
 
-    fn pop<'a>(&self, py: Python<'a>, key: String) -> PyResult<Bound<'a, PyAny>> {
+    fn pop<'a>(&self, py: Python<'a>, key: PyObject) -> PyResult<Bound<'a, PyAny>> {
+        let key = extract_key(key, py)?;
         let map = self.map.clone();
         pyo3_async_runtimes::tokio::future_into_py(py, async move {
             let mut locked = map.lock().await;
@@ -39,7 +57,8 @@ impl RMap {
         })
     }
 
-    fn get<'a>(&self, py: Python<'a>, key: String) -> PyResult<Bound<'a, PyAny>> {
+    fn get<'a>(&self, py: Python<'a>, key: PyObject) -> PyResult<Bound<'a, PyAny>> {
+        let key = extract_key(key, py)?;
         let map = self.map.clone();
         let factory = self.factory.as_ref().map(|f| f.clone_ref(py));
 
