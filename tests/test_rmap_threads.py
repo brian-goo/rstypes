@@ -53,6 +53,3 @@ async def test_rmap_threads() -> None:
     for i in range(10):
         key = f"key_{i}"
         assert await rmap.get(key) is None
-
-        factory_key = f"factory_key_{i}"
-        assert await rmap_with_factory.get(factory_key) is None

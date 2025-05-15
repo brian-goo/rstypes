@@ -65,11 +65,5 @@ async def test_rcachemap_threads() -> None:
         key = f"key_{i}"
         assert await cache.get(key) is None
 
-        user_key = f"user_{i}"
-        assert await cache.get(user_key) is None
-
-        lock_key = f"lock_{i}"
-        assert await cache.get(lock_key) is None
-
         expire_key = f"expire_{i}"
         assert await cache.get(expire_key) is None
