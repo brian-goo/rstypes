@@ -2,9 +2,10 @@ use std::sync::Arc;
 
 use indexmap::{map::Entry, IndexMap};
 use pyo3::prelude::*;
+use pyo3::types::{PyList, PyTuple};
 use tokio::sync::Mutex;
 
-#[derive(Hash, Eq, PartialEq, Clone, Debug)]
+#[derive(Hash, Eq, PartialEq, Clone, Debug, IntoPyObject)]
 pub enum Key {
     Int(i64),
     Str(String),
@@ -78,4 +79,44 @@ impl RMap {
             })
         })
     }
+
+    fn keys<'a>(&self, py: Python<'a>) -> PyResult<Bound<'a, PyAny>> {
+        let map = self.map.clone();
+        pyo3_async_runtimes::tokio::future_into_py::<_, Vec<Key>>(py, async move {
+            let locked = map.lock().await;
+            let keys: Vec<Key> = locked.keys().cloned().collect();
+            Python::with_gil(|_py| Ok(keys.into()))
+        })
+    }
+
+    fn values<'a>(&self, py: Python<'a>) -> PyResult<Bound<'a, PyAny>> {
+        let map = self.map.clone();
+        pyo3_async_runtimes::tokio::future_into_py::<_, Vec<PyObject>>(py, async move {
+            let locked = map.lock().await;
+            Python::with_gil(|py| {
+                let values: Vec<PyObject> = locked.values().map(|v| v.clone_ref(py)).collect();
+                Ok(values.into())
+            })
+        })
+    }
+
+    // fn items<'a>(&self, py: Python<'a>) -> PyResult<Bound<'a, PyAny>> {
+    //     let map = self.map.clone();
+    //     pyo3_async_runtimes::tokio::future_into_py(py, async move {
+    //         let locked = map.lock().await;
+    //         Python::with_gil(|py| {
+    //             let items: Vec<PyObject> = locked
+    //                 .iter()
+    //                 .map(|(k, v)| {
+    //                     let key = match k {
+    //                         Key::Int(i) => i.into_py(py),
+    //                         Key::Str(s) => s.clone().into_py(py),
+    //                     };
+    //                     PyTuple::new(py, [key, v.clone_ref(py)]).into()
+    //                 })
+    //                 .collect();
+    //             Ok(PyList::new(py, items).into())
+    //         })
+    //     })
+    // }
 }
