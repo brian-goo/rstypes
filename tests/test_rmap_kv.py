@@ -1,45 +1,86 @@
-import asyncio
+import pytest
 
 from rstypes import RMap
 
 
-async def main():
+@pytest.mark.asyncio
+async def test_rmap_keys_values_items():
     rmap = RMap()
 
-    await rmap.set("key1", "value1")
-    await rmap.set("key2", "value2")
+    d = {
+        "key1": "value1",
+        "key2": "value2",
+        42: "value3",
+        100: "value4",
+    }
 
-    await rmap.set(42, "value3")
-    await rmap.set(100, "value4")
+    for k, v in d.items():
+        await rmap.set(k, v)
 
     keys = await rmap.keys()
-    print("Initial keys:", keys)
+    assert len(keys) == 4
+    assert "key1" in keys
+    assert "key2" in keys
+    assert 42 in keys
+    assert 100 in keys
 
     values = await rmap.values()
-    print("Initial values:", values)
+    assert len(values) == 4
+    assert "value1" in values
+    assert "value2" in values
+    assert "value3" in values
+    assert "value4" in values
 
     items = await rmap.items()
-    print("Initial items:", items)
+    assert len(items) == 4
+    for k, v in items:
+        assert d[k] == v
+
+
+@pytest.mark.asyncio
+async def test_rmap_update_and_pop():
+    rmap = RMap()
+
+    await rmap.set(key="key1", value="value1")
+    await rmap.set(key="key2", value="value2")
+
+    await rmap.set(key="key1", value="new_value1")
+    assert await rmap.get("key1") == "new_value1"
+
+    await rmap.pop("key1")
+    assert await rmap.get("key1") is None
+
+    keys = await rmap.keys()
+    assert len(keys) == 1
+    assert "key2" in keys
+    assert "key1" not in keys
+
+
+@pytest.mark.asyncio
+async def test_rmap_iter_and_update():
+    rmap = RMap()
+
+    d = {
+        "key1": "value1",
+        "key2": "value2",
+        42: "value3",
+    }
+
+    for k, v in d.items():
+        await rmap.set(key=k, value=v)
 
     for k in await rmap.keys():
         if k == "key1":
             await rmap.set(key=k, value="new_value1")
-        print(k, await rmap.get(k))
+        else:
+            assert await rmap.get(k) == d[k]
+
+    assert await rmap.get("key1") == "new_value1"
+
+    await rmap.set(key="key1", value="value1")
+    for v in await rmap.values():
+        assert v in d.values()
 
     for k, v in await rmap.items():
         await rmap.set(key=k, value=f"{v}_n")
-        print(k, await rmap.get(k))
-
-    await rmap.pop("key1")
-    keys = await rmap.keys()
-    print("Keys after removing 'key1':", keys)
-
-    values = await rmap.values()
-    print("Values after removing 'key1':", values)
-
-    items = await rmap.items()
-    print("Items after removing 'key1':", items)
-
-
-if __name__ == "__main__":
-    asyncio.run(main())
+        assert await rmap.get(k) == f"{v}_n"
