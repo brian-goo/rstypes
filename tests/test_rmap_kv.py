@@ -18,9 +18,16 @@ async def main():
     values = await rmap.values()
     print("Initial values:", values)
 
+    items = await rmap.items()
+    print("Initial items:", items)
+
     for k in await rmap.keys():
         if k == "key1":
             await rmap.set(key=k, value="new_value1")
+        print(k, await rmap.get(k))
+
+    for k, v in await rmap.items():
+        await rmap.set(key=k, value=f"{v}_n")
         print(k, await rmap.get(k))
 
     await rmap.pop("key1")
@@ -29,6 +36,9 @@ async def main():
 
     values = await rmap.values()
     print("Values after removing 'key1':", values)
+
+    items = await rmap.items()
+    print("Items after removing 'key1':", items)
 
 
 if __name__ == "__main__":
