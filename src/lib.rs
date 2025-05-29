@@ -3,7 +3,7 @@ use pyo3::prelude::*;
 mod rtype;
 pub use rtype::{rcache::RCacheMap, rmap::RMap};
 
-#[pymodule(name = "rstypes")]
+#[pymodule(name = "_rstypes")]
 mod _rtype {
 
     #[pymodule_export]
