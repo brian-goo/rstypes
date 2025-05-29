@@ -10,13 +10,17 @@ pub enum Key {
     Str(String),
 }
 
+/// Int key will return error if out of i64 bounds
+/// -2^63 to 2^63 - 1
 pub fn try_into_key(key: PyObject, py: Python<'_>) -> PyResult<Key> {
     if let Ok(i) = key.extract::<i64>(py) {
         Ok(Key::Int(i))
     } else if let Ok(s) = key.extract::<String>(py) {
         Ok(Key::Str(s))
     } else {
-        Err(PyErr::new::<pyo3::exceptions::PyTypeError, _>("Key must be int or str"))
+        Err(PyErr::new::<pyo3::exceptions::PyTypeError, _>(
+            "Key must be an int (within i64 bounds) or str",
+        ))
     }
 }
 

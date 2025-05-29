@@ -152,3 +152,27 @@ async def test_int_key_get_set_race() -> None:
         assert val in (None, 42)  # Value could be None or 42 due to race
 
     await asyncio.gather(set_key(), get_key(), set_key(), get_key())
+
+
+@pytest.mark.asyncio
+async def test_int_key_bounds() -> None:
+    """Test that TypeError is raised when using integer keys outside i64 bounds."""
+    cache = RCacheMap()
+
+    # Test upper bound (2^63) - should raise TypeError
+    with pytest.raises(TypeError):
+        await cache.set(key=2**63, value="answer", ttl=1.0)
+
+    # Test lower bound (-2^63) - should work
+    await cache.set(key=-(2**63), value="negative", ttl=1.0)
+    assert await cache.get(-(2**63)) == "negative"
+
+    # Test just within bounds (2^63 - 1) - should work
+    await cache.set(key=2**63 - 1, value="max", ttl=1.0)
+    assert await cache.get(2**63 - 1) == "max"
+
+    # Verify expiry still works for valid bounds
+    await cache.set(key=-(2**63), value="expire", ttl=0.5)
+    await asyncio.sleep(0.6)
+    await cache.pop_expired()
+    assert await cache.get(-(2**63)) is None

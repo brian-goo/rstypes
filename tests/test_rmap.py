@@ -190,3 +190,21 @@ async def test_concurrent_mixed_keys() -> None:
         assert str_val in (None, "string value")
 
     await asyncio.gather(set_keys(), get_keys(), set_keys(), get_keys())
+
+
+@pytest.mark.asyncio
+async def test_rmap_int_key_bounds():
+    """Test that TypeError is raised when using integer keys outside i64 bounds."""
+    d = RMap()
+
+    # Test upper bound (2^63) - should raise TypeError
+    with pytest.raises(TypeError):
+        await d.set(key=2**63, value="answer")
+
+    # Test lower bound (-2^63) - should work
+    await d.set(key=-(2**63), value="negative")
+    assert await d.get(-(2**63)) == "negative"
+
+    # Test just within bounds (2^63 - 1) - should work
+    await d.set(key=2**63 - 1, value="max")
+    assert await d.get(2**63 - 1) == "max"
