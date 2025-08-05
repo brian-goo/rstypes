@@ -8,11 +8,17 @@ version = "0.1.0"
 description = "Thread-safe async-aware types for Python written in Rust"
 authors = [{ name = "Brian Goo" }]
 requires-python = ">=3.10"
+license = "MIT"
+license-files = ["LICENSE"]
 classifiers = [
     "Programming Language :: Rust",
     "Programming Language :: Python :: Implementation :: CPython",
     "Programming Language :: Python :: Implementation :: PyPy",
 ]
+
+[project.urls]
+Homepage = "https://github.com/brian-goo/rstypes"
+Source = "https://github.com/brian-goo/rstypes"
 
 [tool.maturin]
 python-source = "python"
