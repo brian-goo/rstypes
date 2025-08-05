@@ -14,6 +14,10 @@ classifiers = [
     "Programming Language :: Python :: Implementation :: PyPy",
 ]
 
+[project.urls]
+Homepage = "https://github.com/brian-goo/rstypes"
+Source = "https://github.com/brian-goo/rstypes"
+
 [tool.maturin]
 python-source = "python"
 module-name = "rstypes._rstypes"
