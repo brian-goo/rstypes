@@ -6,6 +6,7 @@ build-backend = "maturin"
 name = "rstypes"
 version = "0.1.0"
 description = "Thread-safe async-aware types for Python written in Rust"
+readme = "README.md"
 authors = [{ name = "Brian Goo" }]
 requires-python = ">=3.10"
 license = "MIT"
