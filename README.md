@@ -7,7 +7,7 @@ This library is ideal for building:
 - ✅ **Global or shared dictionaries** across threads or async tasks
 - ✅ **In-memory async-aware caches** with TTL support
 
-Internally, each instance uses a single **mutex**, not per-key locks, keeping locking semantics simple and predictable.
+Internally, each instance uses a single **mutex**, not per-key locks, which keeps the locking semantics simple and predictable.
 
 ## Features
 
