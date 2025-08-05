@@ -89,11 +89,9 @@ jobs:
             manylinux: musllinux_1_1
             target: armv7
 
-          # windows;
-          # aarch64 only 3.11 and up
+        exclude:
           - os: windows
             target: aarch64
-            interpreter: 3.11 3.12 3.13
 
     runs-on: ${{ (matrix.os == 'linux' && 'ubuntu') || matrix.os }}-latest
     steps:
