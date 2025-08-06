@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "rstypes"
-version = "0.1.0"
+version = "0.1.1"
 description = "Thread-safe async-aware types for Python written in Rust"
 readme = "README.md"
 authors = [{ name = "Brian Goo" }]
