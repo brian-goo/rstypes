@@ -1,6 +1,11 @@
 
 # rstypes
 
+[![CI](https://img.shields.io/github/actions/workflow/status/brian-goo/rstypes/ci.yml?branch=main&logo=github&label=CI)](https://github.com/brian-goo/rstypes/actions?query=event%3Apush+branch%3Amain+workflow%3ACI)
+[![pypi](https://img.shields.io/pypi/v/rstypes.svg)](https://pypi.org/project/rstypes)
+[![Python versions](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue)](https://github.com/brian-goo/rstypes)
+[![PyPI Downloads](https://static.pepy.tech/badge/rstypes)](https://pepy.tech/projects/rstypes)
+
 `rstypes` is a minimal Python package providing **thread-safe**, **async-aware** data types implemented in **Rust**. It is designed for high-performance concurrent and asynchronous programming in Python.
 
 This library is ideal for building:
